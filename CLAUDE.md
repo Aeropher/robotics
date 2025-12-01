@@ -69,3 +69,20 @@ The robot supports these movement modes:
 - Leg calibration: individual leg position adjustment
 
 Keyboard shortcuts (in Control tab): W/A/S/D for movement, Q/E for turning, Z/X/C for mode switching.
+
+## Development Setup (PlatformIO)
+
+The project uses PlatformIO in VS Code for Arduino development. The `platformio.ini` is at the repository root.
+
+**Building and Uploading:**
+1. Open the `robotics/` folder in VS Code with PlatformIO extension installed
+2. Click checkmark (✓) to build, arrow (→) to upload
+3. Robot can be plugged in via USB without battery power for uploading
+
+**Known Behaviors:**
+- Startup shake (leg movement) only works when running on battery — does not work while USB is connected
+- After uploading, unplug USB and power on with battery to see startup behavior
+- Movement functions (`LegMoveToRelatively`, etc.) are disabled when `commFunction=true` — they check `if (!communication.commFunction)` before executing
+- To perform movements regardless of comm mode, access `communication.robotAction` directly (see `StartupShake()` implementation)
+- Leg numbering is 1-6 (not 0-5) when using `RobotAction` methods
+- `LegMoveToRelatively()` calls `WaitUntilFree()` internally, blocking until movement completes

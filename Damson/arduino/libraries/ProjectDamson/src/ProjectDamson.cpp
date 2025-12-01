@@ -135,4 +135,13 @@ void ProjectDamson::SetActionGroup(int group)
     communication.robotAction.SetActionGroup(group);
 }
 
+void ProjectDamson::StartupShake(int leg, int count)
+{
+  // Directly access robotAction to bypass commFunction check
+  for (int i = 0; i < count; i++) {
+    communication.robotAction.LegMoveToRelatively(leg, Point(0, 0, 30));  // Raise leg
+    communication.robotAction.LegMoveToRelatively(leg, Point(0, 0, -30)); // Lower leg
+  }
+}
+
 #endif

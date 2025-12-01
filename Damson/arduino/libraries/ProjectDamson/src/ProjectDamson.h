@@ -189,6 +189,15 @@ public:
   * -----------------------------------------------------------------------------------------------*/
   void SetActionGroup(int group);
 
+ /*
+  * Brief     Perform startup shake to indicate Damson firmware
+  *           This works regardless of communication mode.
+  * Param     leg       The leg to shake (1-6)
+  *           count     Number of shakes
+  * Retval    None
+  * -----------------------------------------------------------------------------------------------*/
+  void StartupShake(int leg = 1, int count = 3);
+
 private:
   Communication communication;
 };

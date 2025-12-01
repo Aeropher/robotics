@@ -3,7 +3,8 @@
     "allow": [
       "WebSearch",
       "WebFetch(domain:github.com)",
-      "Bash(unzip:*)"
+      "Bash(unzip:*)",
+      "Bash(/mnt/c/Users/ajmhe/.platformio/penv/Scripts/platformio.exe run:*)"
     ],
     "deny": [],
     "ask": []

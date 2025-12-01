@@ -23,17 +23,11 @@
 ProjectDamson damson;
 
 void setup() {
-  // Signature startup: blink LED 5 times fast to confirm Damson firmware
-  pinMode(13, OUTPUT);
-  for (int i = 0; i < 5; i++) {
-    digitalWrite(13, HIGH);
-    delay(100);
-    digitalWrite(13, LOW);
-    delay(100);
-  }
-
   // Start with communication enabled (Serial + WiFi)
   damson.Start(true);
+
+  // Signature startup: shake front-right leg to confirm Damson firmware
+  damson.StartupShake(1, 3);  // Leg 1, shake 3 times
 }
 
 void loop() {
