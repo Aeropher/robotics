@@ -23,8 +23,16 @@
 ProjectDamson damson;
 
 void setup() {
+  // Signature startup: blink LED 5 times fast to confirm Damson firmware
+  pinMode(13, OUTPUT);
+  for (int i = 0; i < 5; i++) {
+    digitalWrite(13, HIGH);
+    delay(100);
+    digitalWrite(13, LOW);
+    delay(100);
+  }
+
   // Start with communication enabled (Serial + WiFi)
-  // Set to false if you want to control programmatically only
   damson.Start(true);
 }
 
