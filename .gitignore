@@ -1,0 +1,31 @@
+# Reference code - third party, not for redistribution
+Reference/
+
+# Build artifacts
+*.o
+*.elf
+*.hex
+*.bin
+
+# IDE files
+.vscode/
+*.code-workspace
+.idea/
+
+# Processing
+*.pde~
+
+# Arduino
+*.ino.eep
+*.ino.elf
+*.ino.hex
+*.ino.with_bootloader.hex
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*~
