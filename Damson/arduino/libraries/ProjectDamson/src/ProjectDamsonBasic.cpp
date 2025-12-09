@@ -333,6 +333,8 @@ void RobotLeg::MoveTo(Point point)
 {
   pointGoal = point;
   isBusy = true;
+  // reset trajectory so Robot::UpdateLegAction initializes easing for this move
+  hasTrajectory = false;
 }
 
 void RobotLeg::MoveToRelatively(Point point)
@@ -343,7 +345,8 @@ void RobotLeg::MoveToRelatively(Point point)
 
 void RobotLeg::WaitUntilFree()
 {
-  while (isBusy);
+  while (isBusy)
+    ;
 }
 
 void RobotLeg::ServosRotateTo(float angleA, float angleB, float angleC)
@@ -425,7 +428,8 @@ void Robot::Start()
       break;
 
     default:
-      while (true);
+      while (true)
+        ;
     }
     break;
 
@@ -580,7 +584,8 @@ void Robot::MoveToRelatively(Point point, float speed)
 
 void Robot::WaitUntilFree()
 {
-  while (leg1.isBusy || leg2.isBusy || leg3.isBusy || leg4.isBusy || leg5.isBusy || leg6.isBusy);
+  while (leg1.isBusy || leg2.isBusy || leg3.isBusy || leg4.isBusy || leg5.isBusy || leg6.isBusy)
+    ;
 }
 
 void Robot::SetSpeed(float speed)
@@ -612,16 +617,16 @@ void Robot::SetSpeedMultiple(float multiple)
 bool Robot::CheckPoints(RobotLegsPoints points)
 {
   if (leg1.CheckPoint(points.leg1) &&
-    leg2.CheckPoint(points.leg2) &&
-    leg3.CheckPoint(points.leg3) &&
-    leg4.CheckPoint(points.leg4) &&
-    leg5.CheckPoint(points.leg5) &&
-    leg6.CheckPoint(points.leg6))
+      leg2.CheckPoint(points.leg2) &&
+      leg3.CheckPoint(points.leg3) &&
+      leg4.CheckPoint(points.leg4) &&
+      leg5.CheckPoint(points.leg5) &&
+      leg6.CheckPoint(points.leg6))
     return true;
   return false;
 }
 
-void Robot::GetPointsNow(RobotLegsPoints & points)
+void Robot::GetPointsNow(RobotLegsPoints &points)
 {
   points.leg1 = leg1.pointNow;
   points.leg2 = leg2.pointNow;
@@ -658,24 +663,63 @@ void Robot::UpdateAction()
 
 void Robot::UpdateLegAction(RobotLeg &leg)
 {
-  float distance = Point::GetDistance(leg.pointNow, leg.pointGoal);
-  float xDistance = leg.pointGoal.x - leg.pointNow.x;
-  float yDistance = leg.pointGoal.y - leg.pointNow.y;
-  float zDistance = leg.pointGoal.z - leg.pointNow.z;
-  float xStep = xDistance / distance * leg.stepDistance * speedMultiple;
-  float yStep = yDistance / distance * leg.stepDistance * speedMultiple;
-  float zStep = zDistance / distance * leg.stepDistance * speedMultiple;
-  Point pointGoal = Point(leg.pointNow.x + xStep, leg.pointNow.y + yStep, leg.pointNow.z + zStep);
+  float distanceNow = Point::GetDistance(leg.pointNow, leg.pointGoal);
 
-  if (distance >= leg.stepDistance * speedMultiple && distance >= RobotLeg::negligibleDistance)
+  // If no active trajectory or goal changed significantly, initialize eased trajectory
+  if (leg.isBusy && (!leg.hasTrajectory || leg.totalDistance < RobotLeg::negligibleDistance))
   {
-    leg.isBusy = true;
-    leg.MoveToDirectly(pointGoal);
+    leg.pointStart = leg.pointNow;
+    leg.totalDistance = Point::GetDistance(leg.pointStart, leg.pointGoal);
+    if (leg.totalDistance < RobotLeg::negligibleDistance)
+    {
+      // too small: snap to goal and finish
+      leg.MoveToDirectly(leg.pointGoal);
+      leg.isBusy = false;
+      leg.hasTrajectory = false;
+      return;
+    }
+    // Duration is proportional to how many fixed steps the old linear model would take
+    float steps = ceil(leg.totalDistance / max(0.001f, (leg.stepDistance * speedMultiple)));
+    if (steps < 1)
+      steps = 1;
+    leg.moveDurationMs = (unsigned long)(steps * 20.0f); // FlexiTimer2 tick is 20ms
+    if (leg.moveDurationMs < 20)
+      leg.moveDurationMs = 20;
+    leg.moveStartMillis = millis();
+    leg.hasTrajectory = true;
   }
-  else if (leg.isBusy)
+
+  if (leg.isBusy && leg.hasTrajectory)
   {
-    leg.MoveToDirectly(leg.pointGoal);
-    leg.isBusy = false;
+    unsigned long now = millis();
+    float t = 0.0f;
+    if (leg.moveDurationMs > 0)
+      t = (float)(now - leg.moveStartMillis) / (float)leg.moveDurationMs;
+    if (t < 0)
+      t = 0;
+    if (t > 1)
+      t = 1;
+
+    // Smooth S-curve easing (cubic Hermite: 3t^2 - 2t^3)
+    float te = (3.0f * t * t) - (2.0f * t * t * t);
+
+    // Interpolate from start to goal using eased progress
+    Point target(
+        leg.pointStart.x + (leg.pointGoal.x - leg.pointStart.x) * te,
+        leg.pointStart.y + (leg.pointGoal.y - leg.pointStart.y) * te,
+        leg.pointStart.z + (leg.pointGoal.z - leg.pointStart.z) * te);
+
+    // Move towards target
+    leg.MoveToDirectly(target);
+
+    if (t >= 1.0f || distanceNow < RobotLeg::negligibleDistance)
+    {
+      // Finish movement cleanly
+      leg.MoveToDirectly(leg.pointGoal);
+      leg.isBusy = false;
+      leg.hasTrajectory = false;
+      leg.totalDistance = 0;
+    }
   }
 }
 
@@ -944,12 +988,12 @@ void RobotAction::Crawl(float x, float y, float angle)
   GetTurnPoints(points3, -angle);
 
   RobotLegsPoints points4 = robot.bootPoints;
-  GetCrawlPoints(points4, Point(x  * (crawlSteps - 1) / 2 / 2, y  * (crawlSteps - 1) / 2 / 2, -bodyLift + legLift));
-  GetTurnPoints(points4, angle  * (crawlSteps - 1) / 2 / 2);
+  GetCrawlPoints(points4, Point(x * (crawlSteps - 1) / 2 / 2, y * (crawlSteps - 1) / 2 / 2, -bodyLift + legLift));
+  GetTurnPoints(points4, angle * (crawlSteps - 1) / 2 / 2);
 
   RobotLegsPoints points5 = robot.bootPoints;
-  GetCrawlPoints(points5, Point(x * (crawlSteps - 1) / 2, y  * (crawlSteps - 1) / 2, -bodyLift));
-  GetTurnPoints(points5, angle  * (crawlSteps - 1) / 2);
+  GetCrawlPoints(points5, Point(x * (crawlSteps - 1) / 2, y * (crawlSteps - 1) / 2, -bodyLift));
+  GetTurnPoints(points5, angle * (crawlSteps - 1) / 2);
 
   legMoveIndex < crawlSteps ? legMoveIndex++ : legMoveIndex = 1;
 
@@ -1199,27 +1243,39 @@ bool RobotAction::CheckCrawlPoints(RobotLegsPoints points)
   robot.leg5.CalculateAngle(points.leg5, alpha5, beta, gamma);
   robot.leg6.CalculateAngle(points.leg6, alpha6, beta, gamma);
 
-  if (alpha1 < 0) alpha1 += 360;
-  if (alpha2 < 0) alpha2 += 360;
-  if (alpha3 < 0) alpha3 += 360;
-  if (alpha4 < -180) alpha4 += 360; else if (alpha4 > 180) alpha4 -= 360;
-  if (alpha5 < -180) alpha4 += 360; else if (alpha5 > 180) alpha4 -= 360;
-  if (alpha6 < -180) alpha4 += 360; else if (alpha6 > 180) alpha4 -= 360;
+  if (alpha1 < 0)
+    alpha1 += 360;
+  if (alpha2 < 0)
+    alpha2 += 360;
+  if (alpha3 < 0)
+    alpha3 += 360;
+  if (alpha4 < -180)
+    alpha4 += 360;
+  else if (alpha4 > 180)
+    alpha4 -= 360;
+  if (alpha5 < -180)
+    alpha4 += 360;
+  else if (alpha5 > 180)
+    alpha4 -= 360;
+  if (alpha6 < -180)
+    alpha4 += 360;
+  else if (alpha6 > 180)
+    alpha4 -= 360;
 
   if (alpha1 < 90 || alpha1 > 180 ||
-    alpha3 < 180 || alpha3 > 270 ||
-    alpha4 < 0 || alpha4 > 90 ||
-    alpha6 < -90 || alpha6 > 0 ||
-    alpha2 - alpha1 < minAlphaInterval ||
-    alpha3 - alpha2 < minAlphaInterval ||
-    alpha4 - alpha5 < minAlphaInterval ||
-    alpha5 - alpha6 < minAlphaInterval)
+      alpha3 < 180 || alpha3 > 270 ||
+      alpha4 < 0 || alpha4 > 90 ||
+      alpha6 < -90 || alpha6 > 0 ||
+      alpha2 - alpha1 < minAlphaInterval ||
+      alpha3 - alpha2 < minAlphaInterval ||
+      alpha4 - alpha5 < minAlphaInterval ||
+      alpha5 - alpha6 < minAlphaInterval)
     return false;
 
   return true;
 }
 
-void RobotAction::GetCrawlPoints(RobotLegsPoints & points, Point point)
+void RobotAction::GetCrawlPoints(RobotLegsPoints &points, Point point)
 {
   GetCrawlPoint(points.leg1, point);
   GetCrawlPoint(points.leg2, point);
@@ -1229,12 +1285,12 @@ void RobotAction::GetCrawlPoints(RobotLegsPoints & points, Point point)
   GetCrawlPoint(points.leg6, point);
 }
 
-void RobotAction::GetCrawlPoint(Point & point, Point direction)
+void RobotAction::GetCrawlPoint(Point &point, Point direction)
 {
   point = Point(point.x + direction.x, point.y + direction.y, point.z + direction.z);
 }
 
-void RobotAction::GetTurnPoints(RobotLegsPoints & points, float angle)
+void RobotAction::GetTurnPoints(RobotLegsPoints &points, float angle)
 {
   GetTurnPoint(points.leg1, angle);
   GetTurnPoint(points.leg2, angle);
@@ -1244,7 +1300,7 @@ void RobotAction::GetTurnPoints(RobotLegsPoints & points, float angle)
   GetTurnPoint(points.leg6, angle);
 }
 
-void RobotAction::GetTurnPoint(Point & point, float angle)
+void RobotAction::GetTurnPoint(Point &point, float angle)
 {
   float radian = angle * PI / 180;
   float radius = sqrt(pow(point.x, 2) + pow(point.y, 2));
@@ -1284,7 +1340,7 @@ void RobotAction::TwistBody(Point move, Point rotateAxis, float rotateAngle)
   legsState = LegsState::TwistBodyState;
 }
 
-void RobotAction::GetMoveBodyPoints(RobotLegsPoints & points, Point point)
+void RobotAction::GetMoveBodyPoints(RobotLegsPoints &points, Point point)
 {
   GetMoveBodyPoint(points.leg1, point);
   GetMoveBodyPoint(points.leg2, point);
@@ -1294,7 +1350,7 @@ void RobotAction::GetMoveBodyPoints(RobotLegsPoints & points, Point point)
   GetMoveBodyPoint(points.leg6, point);
 }
 
-void RobotAction::GetMoveBodyPoint(Point & point, Point direction)
+void RobotAction::GetMoveBodyPoint(Point &point, Point direction)
 {
   point = Point(point.x - direction.x, point.y - direction.y, point.z - direction.z);
 }
@@ -1323,7 +1379,7 @@ void RobotAction::GetRotateBodyPoints(RobotLegsPoints &points, Point rotateAxis,
   GetRotateBodyPoint(points.leg6, rotateAxis, rotateAngle);
 }
 
-void RobotAction::GetRotateBodyPoint(Point & point, Point rotateAxis, float rotateAngle)
+void RobotAction::GetRotateBodyPoint(Point &point, Point rotateAxis, float rotateAngle)
 {
   Point oldPoint = point;
 
@@ -1361,20 +1417,20 @@ void RobotAction::LegsMoveTo(RobotLegsPoints points, int leg, float legSpeed)
     return;
 
   float distance[6] = {
-    Point::GetDistance(robot.leg1.pointNow, points.leg1),
-    Point::GetDistance(robot.leg2.pointNow, points.leg2),
-    Point::GetDistance(robot.leg3.pointNow, points.leg3),
-    Point::GetDistance(robot.leg4.pointNow, points.leg4),
-    Point::GetDistance(robot.leg5.pointNow, points.leg5),
-    Point::GetDistance(robot.leg6.pointNow, points.leg6) };
+      Point::GetDistance(robot.leg1.pointNow, points.leg1),
+      Point::GetDistance(robot.leg2.pointNow, points.leg2),
+      Point::GetDistance(robot.leg3.pointNow, points.leg3),
+      Point::GetDistance(robot.leg4.pointNow, points.leg4),
+      Point::GetDistance(robot.leg5.pointNow, points.leg5),
+      Point::GetDistance(robot.leg6.pointNow, points.leg6)};
 
   float speed[6] = {
-    distance[0] / distance[leg - 1] * legSpeed,
-    distance[1] / distance[leg - 1] * legSpeed,
-    distance[2] / distance[leg - 1] * legSpeed,
-    distance[3] / distance[leg - 1] * legSpeed,
-    distance[4] / distance[leg - 1] * legSpeed,
-    distance[5] / distance[leg - 1] * legSpeed };
+      distance[0] / distance[leg - 1] * legSpeed,
+      distance[1] / distance[leg - 1] * legSpeed,
+      distance[2] / distance[leg - 1] * legSpeed,
+      distance[3] / distance[leg - 1] * legSpeed,
+      distance[4] / distance[leg - 1] * legSpeed,
+      distance[5] / distance[leg - 1] * legSpeed};
 
   robot.SetSpeed(speed[0], speed[1], speed[2], speed[3], speed[4], speed[5]);
   robot.MoveTo(points);

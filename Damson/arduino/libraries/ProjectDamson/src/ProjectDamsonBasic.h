@@ -177,6 +177,12 @@ public:
 
   RobotJoint jointA, jointB, jointC;
   Point pointNow, pointGoal;
+  // Trajectory interpolation state (for smooth, eased motion)
+  Point pointStart;                           // starting point for current motion
+  volatile float totalDistance = 0;           // total distance from start to goal
+  volatile bool hasTrajectory = false;        // indicates an active eased trajectory
+  volatile unsigned long moveStartMillis = 0; // millis() at start of trajectory
+  volatile unsigned long moveDurationMs = 0;  // planned duration based on speed
 
   static constexpr float negligibleDistance = 0.1;
   static constexpr float defaultStepDistance = 2;
@@ -196,7 +202,13 @@ public:
   Robot();
   void Start();
 
-  enum State { Install, Calibrate, Boot, Action };
+  enum State
+  {
+    Install,
+    Calibrate,
+    Boot,
+    Action
+  };
   State state = State::Boot;
 
   void InstallState();
@@ -225,26 +237,26 @@ public:
   RobotLeg leg1, leg2, leg3, leg4, leg5, leg6;
 
   const RobotLegsPoints calibrateStatePoints = RobotLegsPoints(
-    Point(-133, 100, 25),
-    Point(-155, 0, 25),
-    Point(-133, -100, 25),
-    Point(133, 100, 25),
-    Point(155, 0, 25),
-    Point(133, -100, 25));
+      Point(-133, 100, 25),
+      Point(-155, 0, 25),
+      Point(-133, -100, 25),
+      Point(133, 100, 25),
+      Point(155, 0, 25),
+      Point(133, -100, 25));
   const RobotLegsPoints calibratePoints = RobotLegsPoints(
-    Point(-103, 85, 0),
-    Point(-125, 0, 0),
-    Point(-103, -85, 0),
-    Point(103, 85, 0),
-    Point(125, 0, 0),
-    Point(103, -85, 0));
+      Point(-103, 85, 0),
+      Point(-125, 0, 0),
+      Point(-103, -85, 0),
+      Point(103, 85, 0),
+      Point(125, 0, 0),
+      Point(103, -85, 0));
   const RobotLegsPoints bootPoints = RobotLegsPoints(
-    Point(-81, 99, 0),
-    Point(-115, 0, 0),
-    Point(-81, -99, 0),
-    Point(81, 99, 0),
-    Point(115, 0, 0),
-    Point(81, -99, 0));
+      Point(-81, 99, 0),
+      Point(-115, 0, 0),
+      Point(-81, -99, 0),
+      Point(81, 99, 0),
+      Point(115, 0, 0),
+      Point(81, -99, 0));
 
   int dataFormatVersion;
   int productVersion;
@@ -305,10 +317,19 @@ public:
 private:
   void ActionState();
 
-  enum Mode { Active, Sleep };
+  enum Mode
+  {
+    Active,
+    Sleep
+  };
   Mode mode = Mode::Sleep;
 
-  enum LegsState { CrawlState, TwistBodyState, LegMoveState };
+  enum LegsState
+  {
+    CrawlState,
+    TwistBodyState,
+    LegMoveState
+  };
   LegsState legsState = LegsState::CrawlState;
 
   RobotLegsPoints initialPoints;

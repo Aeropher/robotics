@@ -33,6 +33,7 @@ No new hardware required. Focus on movement quality and behaviors.
 #### Smooth Movement - Technical Approach
 
 The stock firmware moves servos directly to target positions, causing jerkiness. Solutions:
+
 1. **Servo interpolation** - Break movements into small steps with easing curves
 2. **Bezier/spline paths** - Smooth leg trajectories instead of linear moves
 3. **Velocity limiting** - Cap maximum servo speed changes
@@ -41,6 +42,10 @@ The stock firmware moves servos directly to target positions, causing jerkiness.
 #### Animation System - Concept
 
 ```
+
+---
+
+See also: Engineering Notes for implementation details and learnings: `Damson/ENGINEERING_NOTES.md`
 Animation = sequence of keyframes
 Keyframe = {
   time_offset_ms,
@@ -51,6 +56,7 @@ Keyframe = {
 ```
 
 Example animations:
+
 - **Idle** - Subtle weight shifting, occasional leg adjustments
 - **Alert** - Rise up, look around (body rotation)
 - **Greet** - Wave one front leg
@@ -80,6 +86,7 @@ Purchase components for collision detection and spatial awareness.
 | Bumper/Contact Switches | Physical collision backup | $3 |
 
 Phase 2 Features:
+
 - Obstacle avoidance during explore mode
 - Edge detection (don't walk off tables)
 - Self-righting after tips
@@ -107,6 +114,7 @@ Phase 2 Features:
 ## Reference Projects & Open Source Resources
 
 ### MakeYourPet Hexapod (Inspiration)
+
 - **Main repo**: [MakeYourPet/hexapod](https://github.com/MakeYourPet/hexapod) - 3D print files, wiring diagrams
 - **Firmware**: [EddieCarrera/chica-servo2040-simpleDriver](https://github.com/EddieCarrera/chica-servo2040-simpleDriver) - C++ for RP2040
 - **Platform**: Pimoroni Servo2040 (RP2040-based), controlled via Android app "Chica"
@@ -145,6 +153,7 @@ Phase 2 Features:
 ### Recommended Starting Point for Damson
 
 Based on our Arduino Mega 2560 platform, the **Vorpal Hexapod** approach is most applicable:
+
 1. Implement servo position interpolation in the FNHR library
 2. Use non-blocking timing with `millis()` instead of `delay()`
 3. Add easing functions (ease-in-out) for organic movement
@@ -172,12 +181,14 @@ Based on our Arduino Mega 2560 platform, the **Vorpal Hexapod** approach is most
 ### 1.1 Movement
 
 #### Walking Gaits
+
 - **Forward/Backward** - Linear crawling motion
 - **Left/Right** - Lateral (sideways) movement
 - **Turn Left/Right** - In-place rotation
 - **Combined Crawl** - Diagonal movement with simultaneous rotation via `Crawl(x, y, angle)`
 
 #### Gait Patterns (Action Groups)
+
 | Group | Steps per Cycle | Characteristics |
 |-------|-----------------|-----------------|
 | 1 | 2-step | Fastest, most dynamic |
@@ -185,17 +196,20 @@ Based on our Arduino Mega 2560 platform, the **Vorpal Hexapod** approach is most
 | 3 | 6-step | Slowest, most stable |
 
 #### Body Control (Legs Stay Planted)
+
 - **Height Adjustment** - Raise/lower body (0-45 range)
 - **3D Translation** - Shift body in X/Y/Z (±30 units)
 - **3D Rotation** - Pitch/roll/yaw (±10 degrees)
 - **Twist** - Combined translation + rotation in one command
 
 #### Individual Leg Control
+
 - Move any of 6 legs independently in 3D space
 - Relative positioning (delta X, Y, Z from current position)
 - Useful for calibration and custom gaits
 
 #### Speed Control
+
 - Adjustable action speed (1-100 scale)
 - Affects all locomotion commands
 
@@ -210,6 +224,7 @@ Based on our Arduino Mega 2560 platform, the **Vorpal Hexapod** approach is most
 ### 1.3 Hardware I/O
 
 #### Available I/O Pins (8 total)
+
 | Pin | Label |
 |-----|-------|
 | 20 | Digital |
@@ -224,11 +239,13 @@ Based on our Arduino Mega 2560 platform, the **Vorpal Hexapod** approach is most
 Each pin can be set HIGH/LOW for controlling external devices (LEDs, relays, sensors, etc.)
 
 #### Power Management
+
 - 3 independent power groups for servo load distribution
 - Real-time battery voltage monitoring via analog pin A7
 - Voltage thresholds: ~6.5V on, ~5.5V auto-off
 
 #### Status LED
+
 - Pin 13 LED for connection/operation status
 
 ### 1.4 Sensors (Built-in)
@@ -263,31 +280,41 @@ Default Wi-Fi: SSID="Freenove Hexapod Robot", Password="Freenove"
 ### Beginner Projects (No Hardware Mods)
 
 #### 1. Dance Choreographer
+
 Create a sequence of movements to make Damson "dance" to music.
+
 - **Skills learned**: Sequencing commands, timing, loops
 - **Use**: Body twist, height changes, turns
 - **Challenge**: Sync movements to a beat
 
 #### 2. Obstacle Course Navigator
+
 Program Damson to follow a predetermined path through an obstacle course.
+
 - **Skills learned**: Path planning, movement precision
 - **Use**: Forward, turn, lateral movements
 - **Challenge**: Complete course in shortest time
 
 #### 3. Gait Explorer
+
 Experiment with different gait patterns and speeds.
+
 - **Skills learned**: Understanding locomotion, gait cycles
 - **Use**: Action groups 1-3, speed control
 - **Challenge**: Find optimal gait for different surfaces (carpet, tile, grass)
 
 #### 4. Body Language Communicator
+
 Make Damson express "emotions" through body movements.
+
 - **Skills learned**: Creative programming, state machines
 - **Use**: Body rotation, height, leg positioning
 - **Examples**: "Happy" (bouncing), "Curious" (lean forward), "Tired" (droop low)
 
 #### 5. Follow the Leader
+
 Control Damson in real-time using keyboard input to navigate around your home.
+
 - **Skills learned**: Real-time control, Processing GUI
 - **Use**: All movement commands via keyboard shortcuts
 - **Challenge**: Navigate between rooms, under tables
@@ -295,31 +322,41 @@ Control Damson in real-time using keyboard input to navigate around your home.
 ### Intermediate Projects (Simple Add-ons)
 
 #### 6. Light Show Bot
+
 Add LEDs to the I/O ports and create light patterns synchronized with movement.
+
 - **Hardware**: LEDs + resistors on pins 20, 21, A0, A1, etc.
 - **Skills learned**: Digital I/O, PWM concepts
 - **Challenge**: Create "mood lighting" that changes with activity
 
 #### 7. Sound Reactive Walker
+
 Add a sound sensor and make Damson respond to claps or music.
+
 - **Hardware**: Sound sensor module on analog input
 - **Skills learned**: Analog input, thresholds, triggers
 - **Challenge**: Walk forward on one clap, turn on two claps
 
 #### 8. Boundary Patrol
+
 Add IR sensors to detect edges (table edge, room boundary) and stay within bounds.
+
 - **Hardware**: IR proximity sensors
 - **Skills learned**: Sensor integration, conditional logic
 - **Challenge**: Patrol a table without falling off
 
 #### 9. Battery Monitor Display
+
 Add an LED bar or small OLED to show battery level visually.
+
 - **Hardware**: LED bar graph or I2C OLED display
 - **Skills learned**: Voltage reading, visual feedback, I2C (for OLED)
 - **Challenge**: Different LED patterns for charge levels
 
 #### 10. Remote Control via Phone
+
 Create a simple phone app or web interface to control Damson over Wi-Fi.
+
 - **Hardware**: None (uses built-in ESP8266)
 - **Skills learned**: Network programming, TCP sockets, UI design
 - **Challenge**: Build a virtual joystick interface
@@ -327,36 +364,48 @@ Create a simple phone app or web interface to control Damson over Wi-Fi.
 ### Advanced Projects (More Complex)
 
 #### 11. Terrain Adaptation
+
 Add tilt/accelerometer sensor and adjust body angle to stay level on slopes.
+
 - **Hardware**: MPU6050 or similar IMU
 - **Skills learned**: IMU data, real-time feedback loops, PID concepts
 - **Challenge**: Walk up a ramp while keeping body level
 
 #### 12. Autonomous Explorer
+
 Add ultrasonic sensors for obstacle detection and create autonomous navigation.
+
 - **Hardware**: HC-SR04 ultrasonic sensors (front, sides)
 - **Skills learned**: Distance sensing, decision trees, autonomous behavior
 - **Challenge**: Explore a room without bumping into anything
 
 #### 13. Follow Me Bot
+
 Use an IR beacon or Bluetooth signal strength to follow a person.
+
 - **Hardware**: IR receiver + transmitter beacon, or Bluetooth module
 - **Skills learned**: Signal tracking, proportional control
 - **Challenge**: Maintain consistent following distance
 
 #### 14. Custom Gait Designer
+
 Create entirely new walking patterns beyond the built-in 2/4/6-step gaits.
+
 - **Skills learned**: Inverse kinematics basics, leg coordination, timing
 - **Challenge**: Design a "gallop" or "wave" gait
 
 #### 15. Voice Command Control
+
 Add a voice recognition module to control Damson with spoken commands.
+
 - **Hardware**: Voice recognition module (e.g., Elechouse V3)
 - **Skills learned**: Voice recognition, command parsing
 - **Commands**: "Damson, forward", "Damson, dance", "Damson, sleep"
 
 #### 16. Multi-Robot Coordination
+
 If you have multiple hexapods, make them move in formation.
+
 - **Hardware**: Second hexapod, RF24 communication between them
 - **Skills learned**: Robot-to-robot communication, synchronization
 - **Challenge**: March in a line, mirror movements
@@ -366,6 +415,7 @@ If you have multiple hexapods, make them move in formation.
 ## Appendix: Quick Reference
 
 ### Keyboard Shortcuts (Processing App - Control Tab)
+
 | Key | Action |
 |-----|--------|
 | W | Forward |
@@ -379,6 +429,7 @@ If you have multiple hexapods, make them move in formation.
 | C | Deactivate (Sleep) |
 
 ### Communication Protocol Summary
+
 - Frame: `[128] [order] [data...] [129]`
 - Orders 0-63: Non-blocking (immediate response)
 - Orders 64-127: Blocking (responds with start, then done)
