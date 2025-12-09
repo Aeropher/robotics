@@ -19,6 +19,9 @@ IdleAnimations::IdleAnimations() {}
 void IdleAnimations::SetRobotAction(RobotAction* action)
 {
   robotAction = action;
+
+  // Seed random number generator with noise from an unconnected analog pin
+  randomSeed(analogRead(A15));
 }
 
 void IdleAnimations::Update()
@@ -63,8 +66,14 @@ void IdleAnimations::Update()
 
     isAnimating = false;
 
-    // Reset timer AFTER animation completes - next animation in N seconds
+    // Reset timer AFTER animation completes
     lastActivityTime = millis();
+
+    // Randomize next timeout (weighted towards shorter delays)
+    // Using squared random for weighting: more likely to be lower
+    float r = random(1000) / 1000.0;  // 0.0 to 1.0
+    r = r * r;                         // Square it to weight towards lower values
+    timeoutSeconds = 1 + (int)(r * 4); // 1 to 5 seconds
   }
 }
 

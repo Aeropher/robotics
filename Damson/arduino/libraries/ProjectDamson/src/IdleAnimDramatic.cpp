@@ -150,4 +150,31 @@ void IdleAnimations::AllLegTwitch()
   robotAction->InitialState();
 }
 
+// DefensiveCrouch: Spider-like defensive pose - lean back, tilt up, raise front legs
+void IdleAnimations::DefensiveCrouch()
+{
+  if (robotAction == nullptr) return;
+
+  const float leanBack = -15;     // mm - shift body backward
+  const float tiltUp = -20;       // degrees - tilt front up (negative = front rises)
+  const float legRaise = 50;      // mm - raise front legs high
+
+  // Lean back and tilt front up
+  robotAction->TwistBody(Point(0, leanBack, 0), Point(tiltUp, 0, 0));
+  delay(200);
+
+  // Raise both front legs into the air threateningly
+  robotAction->LegMoveToRelatively(1, Point(0, 0, legRaise));  // Front right
+  robotAction->LegMoveToRelatively(4, Point(0, 0, legRaise));  // Front left
+
+  // Hold defensive pose
+  delay(1500);
+
+  // Lower front legs before resetting
+  robotAction->LegMoveToRelatively(1, Point(0, 0, -legRaise));
+  robotAction->LegMoveToRelatively(4, Point(0, 0, -legRaise));
+
+  robotAction->InitialState();
+}
+
 #endif

@@ -15,19 +15,20 @@ void IdleAnimations::Wave(int leg)
 {
   if (robotAction == nullptr) return;
 
-  const float liftHeight = 40;   // mm
-  const float waveAmount = 20;   // mm side to side
+  const float liftHeight = 50;   // mm - lift high off ground
+  const float waveAmount = 25;   // mm side to side
   const int waveCount = 3;
 
-  // Raise leg high
+  // First lift leg straight up off the ground
   robotAction->LegMoveToRelatively(leg, Point(0, 0, liftHeight));
+  delay(200);  // Pause to show leg is raised
 
   // Wave side to side
   for (int i = 0; i < waveCount; i++) {
     robotAction->LegMoveToRelatively(leg, Point(waveAmount, 0, 0));
-    delay(100);
+    delay(150);
     robotAction->LegMoveToRelatively(leg, Point(-waveAmount * 2, 0, 0));
-    delay(100);
+    delay(150);
     robotAction->LegMoveToRelatively(leg, Point(waveAmount, 0, 0));
   }
 

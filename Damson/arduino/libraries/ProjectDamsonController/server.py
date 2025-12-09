@@ -257,6 +257,24 @@ HTML_PAGE = """<!DOCTYPE html>
             <button onclick="send('tall')">Stand Tall</button>
             <button onclick="send('liedown')">Lie Down</button>
             <button onclick="send('twitch')">All Leg Twitch</button>
+            <button onclick="send('defensive')">Defensive Crouch</button>
+        </div>
+    </div>
+
+    <div class="section" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+        <h2>🚶 Walk</h2>
+        <div class="button-grid">
+            <button onclick="send('walkfb')" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: #1a1a2e;">Forward / Back</button>
+            <button onclick="send('walklr')" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: #1a1a2e;">Left / Right</button>
+            <button onclick="send('walkturn')" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: #1a1a2e;">Turn L / R</button>
+            <button onclick="send('tripod')" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: #1a1a2e;">Tripod Gait</button>
+        </div>
+    </div>
+
+    <div class="section" style="background: linear-gradient(135deg, #232526 0%, #414345 100%); border: 2px solid #ff6b6b;">
+        <h2>⚡ Actions</h2>
+        <div class="button-grid">
+            <button onclick="send('jump')" style="background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color: white; font-weight: bold; font-size: 16px;">🦘 JUMP!</button>
         </div>
     </div>
 

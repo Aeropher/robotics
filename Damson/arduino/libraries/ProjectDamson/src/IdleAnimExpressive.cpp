@@ -39,17 +39,17 @@ void IdleAnimations::ShakeOff()
 {
   if (robotAction == nullptr) return;
 
-  const float shakeAngle = 10;  // degrees
-  const int shakeCount = 4;
+  const float shakeAngle = 12;  // degrees
+  const int shakeCount = 6;
 
   for (int i = 0; i < shakeCount; i++) {
     // Shake left
     robotAction->TwistBody(Point(0, 0, 0), Point(0, 0, shakeAngle));
-    delay(80);
+    delay(40);
 
     // Shake right
     robotAction->TwistBody(Point(0, 0, 0), Point(0, 0, -shakeAngle * 2));
-    delay(80);
+    delay(40);
 
     // Back to center
     robotAction->TwistBody(Point(0, 0, 0), Point(0, 0, shakeAngle));

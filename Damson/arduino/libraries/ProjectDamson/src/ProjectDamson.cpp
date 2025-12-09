@@ -145,4 +145,25 @@ void ProjectDamson::StartupShake(int leg, int count)
   }
 }
 
+void ProjectDamson::Jump()
+{
+  // Jump attempt: crouch down quickly, then explosively extend all legs
+  // The idea is to build potential energy in crouch, then release it fast
+
+  const float crouchDepth = -40;   // mm - crouch down
+  const float jumpHeight = 60;     // mm - extend legs for jump
+
+  // Phase 1: Quick crouch to build potential energy
+  communication.robotAction.TwistBody(Point(0, 0, crouchDepth), Point(0, 0, 0));
+
+  // Phase 2: Explosive extension - push off!
+  // Move as fast as possible by using large movement
+  communication.robotAction.TwistBody(Point(0, 0, jumpHeight + (-crouchDepth)), Point(0, 0, 0));
+
+  // Phase 3: Return to normal after landing
+  delay(300);  // Air time + landing
+
+  communication.robotAction.InitialState();
+}
+
 #endif

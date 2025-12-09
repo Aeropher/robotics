@@ -209,10 +209,47 @@ public:
   * -----------------------------------------------------------------------------------------------*/
   void AllLegTwitch();
 
+ /*
+  * Brief     Defensive spider crouch - lean back, tilt up, raise front legs
+  * Param     None
+  * Retval    None
+  * -----------------------------------------------------------------------------------------------*/
+  void DefensiveCrouch();
+
+  // --- Walk Animations ---
+
+ /*
+  * Brief     Walk 2 steps forward then 2 steps back
+  * Param     None
+  * Retval    None
+  * -----------------------------------------------------------------------------------------------*/
+  void WalkForwardBack();
+
+ /*
+  * Brief     Walk 2 steps left then 2 steps right
+  * Param     None
+  * Retval    None
+  * -----------------------------------------------------------------------------------------------*/
+  void WalkLeftRight();
+
+ /*
+  * Brief     Turn left then turn right
+  * Param     None
+  * Retval    None
+  * -----------------------------------------------------------------------------------------------*/
+  void WalkTurnLeftRight();
+
+ /*
+  * Brief     Tripod gait walk - move 3 legs at once, forward then back
+  * Param     None
+  * Retval    None
+  * -----------------------------------------------------------------------------------------------*/
+  void TripodForwardBack();
+
 private:
   RobotAction* robotAction = nullptr;
   unsigned long lastActivityTime = 0;
-  unsigned int timeoutSeconds = 2;  // TODO: Change back to 20 for production
+  unsigned int timeoutSeconds = 1;  // Time between idle animations
   bool enabled = true;
   bool isAnimating = false;  // True while an animation is running
   int lastAnimation = -1;    // Last played animation (-1 = none)

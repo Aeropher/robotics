@@ -173,6 +173,38 @@ void processCommand(String cmd) {
     damson.idle.AllLegTwitch();
     Serial.println(F("Done."));
   }
+  else if (cmd == "defensive") {
+    Serial.println(F("Playing: DefensiveCrouch"));
+    damson.idle.DefensiveCrouch();
+    Serial.println(F("Done."));
+  }
+  // Walk animations
+  else if (cmd == "walkfb") {
+    Serial.println(F("Playing: WalkForwardBack"));
+    damson.idle.WalkForwardBack();
+    Serial.println(F("Done."));
+  }
+  else if (cmd == "walklr") {
+    Serial.println(F("Playing: WalkLeftRight"));
+    damson.idle.WalkLeftRight();
+    Serial.println(F("Done."));
+  }
+  else if (cmd == "walkturn") {
+    Serial.println(F("Playing: WalkTurnLeftRight"));
+    damson.idle.WalkTurnLeftRight();
+    Serial.println(F("Done."));
+  }
+  else if (cmd == "tripod") {
+    Serial.println(F("Playing: TripodForwardBack"));
+    damson.idle.TripodForwardBack();
+    Serial.println(F("Done."));
+  }
+  // Actions (not idle animations)
+  else if (cmd == "jump") {
+    Serial.println(F("Action: Jump!"));
+    damson.Jump();
+    Serial.println(F("Done."));
+  }
   // Control commands
   else if (cmd == "reset") {
     Serial.println(F("Resetting to initial position..."));
@@ -222,8 +254,8 @@ void setup() {
   // Signature startup: shake front-right leg to confirm Damson firmware
   damson.StartupShake(1, 3);  // Leg 1, shake 3 times
 
-  // Disable auto idle animations by default for testing
-  damson.idle.SetEnabled(false);
+  // Enable idle animations (use web interface to disable for manual testing)
+  damson.idle.SetEnabled(true);
 
   // Print welcome message
   Serial.println(F(""));

@@ -199,6 +199,17 @@ public:
   * -----------------------------------------------------------------------------------------------*/
   void StartupShake(int leg = 1, int count = 3);
 
+  // ===============================================================================================
+  // ACTIONS - Active animations (not part of idle sequence)
+  // ===============================================================================================
+
+ /*
+  * Brief     Attempt to jump by quickly crouching then extending all legs
+  * Param     None
+  * Retval    None
+  * -----------------------------------------------------------------------------------------------*/
+  void Jump();
+
   // Idle animation system - see ProjectDamsonIdle.h for full API
   IdleAnimations idle;
 
