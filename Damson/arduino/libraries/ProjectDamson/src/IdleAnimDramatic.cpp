@@ -94,7 +94,7 @@ void IdleAnimations::StandTall()
 {
   if (robotAction == nullptr) return;
 
-  const float maxHeight = 35;  // mm - maximum safe height
+  const float maxHeight = 55;  // mm - stand as tall as we can!
 
   // Rise up to full height
   robotAction->TwistBody(Point(0, 0, maxHeight), Point(0, 0, 0));
@@ -105,17 +105,28 @@ void IdleAnimations::StandTall()
   robotAction->InitialState();
 }
 
-// LieDown: Lower body and stretch all legs outward
+// LieDown: Lower body all the way to the surface
 void IdleAnimations::LieDown()
 {
   if (robotAction == nullptr) return;
 
-  const float lowerHeight = -25;  // mm - lower body
-  const float legExtend = 15;     // mm - extend legs outward
+  const float lowerHeight = -55;  // mm - lower body to the ground
 
-  // Lower body down
+  // Lower body all the way down
   robotAction->TwistBody(Point(0, 0, lowerHeight), Point(0, 0, 0));
-  delay(200);
+
+  // Hold lying down pose
+  delay(2000);
+
+  robotAction->InitialState();
+}
+
+// AllLegTwitch: Stretch all legs outward then back
+void IdleAnimations::AllLegTwitch()
+{
+  if (robotAction == nullptr) return;
+
+  const float legExtend = 15;  // mm - extend legs outward
 
   // Stretch all legs outward (away from body)
   robotAction->LegMoveToRelatively(1, Point(-legExtend, legExtend, 0));   // Front right - out and forward
@@ -125,8 +136,8 @@ void IdleAnimations::LieDown()
   robotAction->LegMoveToRelatively(5, Point(legExtend, 0, 0));            // Mid left - out
   robotAction->LegMoveToRelatively(6, Point(legExtend, -legExtend, 0));   // Back left - out and back
 
-  // Hold relaxed pose
-  delay(1500);
+  // Hold stretched pose
+  delay(800);
 
   // Retract all legs back before resetting
   robotAction->LegMoveToRelatively(1, Point(legExtend, -legExtend, 0));

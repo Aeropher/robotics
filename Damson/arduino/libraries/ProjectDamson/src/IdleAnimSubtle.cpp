@@ -10,30 +10,24 @@
 #include "ProjectDamsonIdle.h"
 #include <Arduino.h>
 
-// Breathing: Gentle body rise and fall over 6 seconds
+// Breathing: Gentle body rise and fall
 void IdleAnimations::Breathing()
 {
   if (robotAction == nullptr) return;
 
-  const float totalHeight = 12;  // mm total rise
-  const int steps = 30;          // number of steps for smooth motion
-  const float stepHeight = totalHeight / steps;
-  const int stepDelay = 100;     // 100ms per step = 3 seconds total
+  const float breathHeight = 20;  // mm total rise
 
-  // Inhale - slowly rise up over 3 seconds
-  for (int i = 0; i < steps; i++) {
-    robotAction->TwistBody(Point(0, 0, stepHeight), Point(0, 0, 0));
-    delay(stepDelay);
-  }
+  // Inhale - rise up
+  robotAction->TwistBody(Point(0, 0, breathHeight), Point(0, 0, 0));
 
-  // Brief pause at top of breath
-  delay(200);
+  // Hold at top of breath
+  delay(800);
 
-  // Exhale - slowly lower down over 3 seconds
-  for (int i = 0; i < steps; i++) {
-    robotAction->TwistBody(Point(0, 0, -stepHeight), Point(0, 0, 0));
-    delay(stepDelay);
-  }
+  // Exhale - lower back down
+  robotAction->TwistBody(Point(0, 0, -breathHeight), Point(0, 0, 0));
+
+  // Hold at bottom
+  delay(600);
 
   robotAction->InitialState();
 }

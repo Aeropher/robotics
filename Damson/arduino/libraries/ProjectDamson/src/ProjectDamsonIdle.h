@@ -196,11 +196,18 @@ public:
   void StandTall();
 
  /*
-  * Brief     Lie down low and stretch all legs outward
+  * Brief     Lie down with body on the surface
   * Param     None
   * Retval    None
   * -----------------------------------------------------------------------------------------------*/
   void LieDown();
+
+ /*
+  * Brief     Twitch all legs outward then back
+  * Param     None
+  * Retval    None
+  * -----------------------------------------------------------------------------------------------*/
+  void AllLegTwitch();
 
 private:
   RobotAction* robotAction = nullptr;

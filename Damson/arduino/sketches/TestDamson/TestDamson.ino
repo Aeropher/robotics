@@ -168,6 +168,11 @@ void processCommand(String cmd) {
     damson.idle.LieDown();
     Serial.println(F("Done."));
   }
+  else if (cmd == "twitch") {
+    Serial.println(F("Playing: AllLegTwitch"));
+    damson.idle.AllLegTwitch();
+    Serial.println(F("Done."));
+  }
   // Control commands
   else if (cmd == "reset") {
     Serial.println(F("Resetting to initial position..."));
@@ -207,8 +212,15 @@ void processCommand(String cmd) {
 }
 
 void setup() {
-  // Start with communication enabled (Serial + WiFi)
-  damson.Start(true);
+  // Start with communication DISABLED so we can use serial for text commands
+  // (The protocol handler would otherwise consume our serial data)
+  damson.Start(false);
+
+  // Manually start serial since we disabled commFunction
+  Serial.begin(115200);
+
+  // Signature startup: shake front-right leg to confirm Damson firmware
+  damson.StartupShake(1, 3);  // Leg 1, shake 3 times
 
   // Disable auto idle animations by default for testing
   damson.idle.SetEnabled(false);

@@ -256,6 +256,7 @@ HTML_PAGE = """<!DOCTYPE html>
             <button onclick="send('drum')">Drum Fingers</button>
             <button onclick="send('tall')">Stand Tall</button>
             <button onclick="send('liedown')">Lie Down</button>
+            <button onclick="send('twitch')">All Leg Twitch</button>
         </div>
     </div>
 
