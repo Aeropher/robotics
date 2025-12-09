@@ -15,6 +15,7 @@ ProjectDamson::ProjectDamson() {}
 void ProjectDamson::Start(bool commFunction)
 {
   communication.Start(commFunction);
+  idle.SetRobotAction(&communication.robotAction);
 }
 
 void ProjectDamson::Update()

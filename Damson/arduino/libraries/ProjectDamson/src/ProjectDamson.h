@@ -15,6 +15,7 @@
 #if defined(ARDUINO_AVR_MEGA2560)
 
 #include "ProjectDamsonComm.h"
+#include "ProjectDamsonIdle.h"
 
 class ProjectDamson
 {
@@ -197,6 +198,9 @@ public:
   * Retval    None
   * -----------------------------------------------------------------------------------------------*/
   void StartupShake(int leg = 1, int count = 3);
+
+  // Idle animation system - see ProjectDamsonIdle.h for full API
+  IdleAnimations idle;
 
 private:
   Communication communication;
