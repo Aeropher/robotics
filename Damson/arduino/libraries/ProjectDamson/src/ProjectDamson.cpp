@@ -147,23 +147,37 @@ void ProjectDamson::StartupShake(int leg, int count)
 
 void ProjectDamson::Jump()
 {
+  // Default jump at 75% speed
+  JumpWithSpeed(0.75);
+}
+
+void ProjectDamson::JumpWithSpeed(float speedMultiple)
+{
   // Jump attempt: crouch down quickly, then explosively extend all legs
   // The idea is to build potential energy in crouch, then release it fast
 
-  const float crouchDepth = -40;   // mm - crouch down
-  const float jumpHeight = 60;     // mm - extend legs for jump
+  const float crouchDepth = -45;   // mm - crouch down deep
+  const float jumpHeight = 65;     // mm - extend legs for jump
+
+  // Set speed for movement
+  communication.robotAction.SetSpeedMultiple(speedMultiple);
 
   // Phase 1: Quick crouch to build potential energy
   communication.robotAction.TwistBody(Point(0, 0, crouchDepth), Point(0, 0, 0));
 
+  // Minimal pause at bottom - just enough to let servos reach position
+  delay(50);
+
   // Phase 2: Explosive extension - push off!
-  // Move as fast as possible by using large movement
   communication.robotAction.TwistBody(Point(0, 0, jumpHeight + (-crouchDepth)), Point(0, 0, 0));
 
   // Phase 3: Return to normal after landing
-  delay(300);  // Air time + landing
+  delay(400);  // Air time + landing
 
   communication.robotAction.InitialState();
+
+  // Reset to normal speed
+  communication.robotAction.SetSpeedMultiple(0.5);
 }
 
 #endif

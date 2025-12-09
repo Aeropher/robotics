@@ -262,19 +262,35 @@ HTML_PAGE = """<!DOCTYPE html>
     </div>
 
     <div class="section" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
-        <h2>🚶 Walk</h2>
+        <h2>🚶 Walk - Default Gait (Tripod)</h2>
         <div class="button-grid">
-            <button onclick="send('walkfb')" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: #1a1a2e;">Forward / Back</button>
-            <button onclick="send('walklr')" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: #1a1a2e;">Left / Right</button>
-            <button onclick="send('walkturn')" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: #1a1a2e;">Turn L / R</button>
-            <button onclick="send('tripod')" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: #1a1a2e;">Tripod Gait</button>
+            <button onclick="send('deffb')" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: #1a1a2e;">Forward / Back</button>
+            <button onclick="send('defbf')" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: #1a1a2e;">Back / Forward</button>
+            <button onclick="send('deflr')" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: #1a1a2e;">Left / Right</button>
+            <button onclick="send('defrl')" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: #1a1a2e;">Right / Left</button>
+            <button onclick="send('deftlr')" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: #1a1a2e;">Turn L / R</button>
+            <button onclick="send('deftrl')" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: #1a1a2e;">Turn R / L</button>
+        </div>
+    </div>
+
+    <div class="section" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+        <h2>🐛 Walk - Wave Gait (One Leg)</h2>
+        <div class="button-grid">
+            <button onclick="send('wavefb')" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: #1a1a2e;">Forward / Back</button>
+            <button onclick="send('wavebf')" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: #1a1a2e;">Back / Forward</button>
+            <button onclick="send('wavelr')" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: #1a1a2e;">Left / Right</button>
+            <button onclick="send('waverl')" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: #1a1a2e;">Right / Left</button>
+            <button onclick="send('wavetlr')" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: #1a1a2e;">Turn L / R</button>
+            <button onclick="send('wavetrl')" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: #1a1a2e;">Turn R / L</button>
         </div>
     </div>
 
     <div class="section" style="background: linear-gradient(135deg, #232526 0%, #414345 100%); border: 2px solid #ff6b6b;">
         <h2>⚡ Actions</h2>
         <div class="button-grid">
-            <button onclick="send('jump')" style="background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color: white; font-weight: bold; font-size: 16px;">🦘 JUMP!</button>
+            <button onclick="send('jump50')" style="background: linear-gradient(135deg, #f5af19 0%, #f12711 100%); color: white; font-weight: bold;">Jump 50%</button>
+            <button onclick="send('jump75')" style="background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color: white; font-weight: bold;">Jump 75%</button>
+            <button onclick="send('jump100')" style="background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%); color: white; font-weight: bold; font-size: 16px;">🦘 JUMP 100%!</button>
         </div>
     </div>
 

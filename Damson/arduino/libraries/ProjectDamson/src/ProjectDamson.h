@@ -210,6 +210,13 @@ public:
   * -----------------------------------------------------------------------------------------------*/
   void Jump();
 
+ /*
+  * Brief     Jump with specified speed (for testing different speeds)
+  * Param     speedMultiple   Speed from 0.0 to 1.0 (0.5 = 50%, 1.0 = 100%)
+  * Retval    None
+  * -----------------------------------------------------------------------------------------------*/
+  void JumpWithSpeed(float speedMultiple);
+
   // Idle animation system - see ProjectDamsonIdle.h for full API
   IdleAnimations idle;
 

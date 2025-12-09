@@ -162,7 +162,16 @@ bool IdleAnimations::IsAnimating()
 void IdleAnimations::Reset()
 {
   if (robotAction == nullptr) return;
+
+  // First, force body back to neutral position using TwistBody with zero values
+  // This ensures we start from a known state regardless of current position
+  robotAction->TwistBody(Point(0, 0, 0), Point(0, 0, 0));
+
+  // Now call InitialState which will properly transition to CrawlState
   robotAction->InitialState();
+
+  // Ensure robot is in active mode and ready for commands
+  robotAction->ActiveMode();
 }
 
 #endif

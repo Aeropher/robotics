@@ -216,34 +216,29 @@ public:
   * -----------------------------------------------------------------------------------------------*/
   void DefensiveCrouch();
 
-  // --- Walk Animations ---
+  // --- Walk Animations: Default Gait (Tripod) ---
 
- /*
-  * Brief     Walk 2 steps forward then 2 steps back
-  * Param     None
-  * Retval    None
-  * -----------------------------------------------------------------------------------------------*/
+  void DefaultForwardBack();
+  void DefaultBackForward();
+  void DefaultLeftRight();
+  void DefaultRightLeft();
+  void DefaultTurnLeftRight();
+  void DefaultTurnRightLeft();
+
+  // --- Walk Animations: Wave Gait (One leg at a time) ---
+
+  void WaveForwardBack();
+  void WaveBackForward();
+  void WaveLeftRight();
+  void WaveRightLeft();
+  void WaveTurnLeftRight();
+  void WaveTurnRightLeft();
+
+  // --- Legacy Walk Aliases ---
+
   void WalkForwardBack();
-
- /*
-  * Brief     Walk 2 steps left then 2 steps right
-  * Param     None
-  * Retval    None
-  * -----------------------------------------------------------------------------------------------*/
   void WalkLeftRight();
-
- /*
-  * Brief     Turn left then turn right
-  * Param     None
-  * Retval    None
-  * -----------------------------------------------------------------------------------------------*/
   void WalkTurnLeftRight();
-
- /*
-  * Brief     Tripod gait walk - move 3 legs at once, forward then back
-  * Param     None
-  * Retval    None
-  * -----------------------------------------------------------------------------------------------*/
   void TripodForwardBack();
 
 private:

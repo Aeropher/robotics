@@ -1,38 +1,16 @@
-/*
- * TestDamson.ino
- *
- * Test sketch with serial command interface for tuning idle animations.
- *
- * Serial Commands (115200 baud):
- *   help        - List all commands
- *   breathing   - Play Breathing animation
- *   weightshift - Play WeightShift animation
- *   lookaround  - Play LookAround animation
- *   stretch     - Play Stretch animation
- *   shakeoff    - Play ShakeOff animation
- *   yawn        - Play Yawn animation
- *   tapfoot     - Play TapFoot animation
- *   wave        - Play Wave animation
- *   dance       - Play DanceWiggle animation
- *   curious     - Play CuriousPeek animation
- *   bounce      - Play HappyBounce animation
- *   startle     - Play Startle animation
- *   pounce      - Play PounceReady animation
- *   victory     - Play VictoryPose animation
- *   drum        - Play DrumFingers animation
- *   tall        - Play StandTall animation
- *   liedown     - Play LieDown animation
- *   reset       - Return to initial position
- *   idle on     - Enable auto idle animations
- *   idle off    - Disable auto idle animations
- *   timeout N   - Set idle timeout to N seconds
- */
-
+# 1 "C:\\Users\\ajmhe\\AppData\\Local\\Temp\\tmp81m23msn"
+#include <Arduino.h>
+# 1 "C:/Repos/robotics/Damson/arduino/sketches/TestDamson/TestDamson.ino"
+# 31 "C:/Repos/robotics/Damson/arduino/sketches/TestDamson/TestDamson.ino"
 #include <ProjectDamson.h>
 
 ProjectDamson damson;
 String inputBuffer = "";
-
+void printHelp();
+void processCommand(String cmd);
+void setup();
+void loop();
+#line 36 "C:/Repos/robotics/Damson/arduino/sketches/TestDamson/TestDamson.ino"
 void printHelp() {
   Serial.println(F(""));
   Serial.println(F("=== Damson Animation Tester ==="));
@@ -79,7 +57,7 @@ void processCommand(String cmd) {
   Serial.print(F("> "));
   Serial.println(cmd);
 
-  // Subtle animations
+
   if (cmd == "breathing") {
     Serial.println(F("Playing: Breathing"));
     damson.idle.Breathing();
@@ -95,7 +73,7 @@ void processCommand(String cmd) {
     damson.idle.LookAround();
     Serial.println(F("Done."));
   }
-  // Expressive animations
+
   else if (cmd == "stretch") {
     Serial.println(F("Playing: Stretch"));
     damson.idle.Stretch();
@@ -116,7 +94,7 @@ void processCommand(String cmd) {
     damson.idle.TapFoot();
     Serial.println(F("Done."));
   }
-  // Playful animations
+
   else if (cmd == "wave") {
     Serial.println(F("Playing: Wave"));
     damson.idle.Wave();
@@ -137,7 +115,7 @@ void processCommand(String cmd) {
     damson.idle.HappyBounce();
     Serial.println(F("Done."));
   }
-  // Dramatic animations
+
   else if (cmd == "startle") {
     Serial.println(F("Playing: Startle"));
     damson.idle.Startle();
@@ -178,7 +156,7 @@ void processCommand(String cmd) {
     damson.idle.DefensiveCrouch();
     Serial.println(F("Done."));
   }
-  // Walk animations - Default Gait (Tripod)
+
   else if (cmd == "deffb") {
     Serial.println(F("Playing: DefaultForwardBack"));
     damson.idle.DefaultForwardBack();
@@ -209,7 +187,7 @@ void processCommand(String cmd) {
     damson.idle.DefaultTurnRightLeft();
     Serial.println(F("Done."));
   }
-  // Walk animations - Wave Gait (One leg at a time)
+
   else if (cmd == "wavefb") {
     Serial.println(F("Playing: WaveForwardBack"));
     damson.idle.WaveForwardBack();
@@ -240,7 +218,7 @@ void processCommand(String cmd) {
     damson.idle.WaveTurnRightLeft();
     Serial.println(F("Done."));
   }
-  // Actions (not idle animations)
+
   else if (cmd == "jump") {
     Serial.println(F("Action: Jump (75%)"));
     damson.Jump();
@@ -261,7 +239,7 @@ void processCommand(String cmd) {
     damson.JumpWithSpeed(1.0);
     Serial.println(F("Done."));
   }
-  // Control commands
+
   else if (cmd == "reset") {
     Serial.println(F("Resetting to initial position..."));
     damson.idle.Reset();
@@ -295,25 +273,25 @@ void processCommand(String cmd) {
     Serial.println(F("Type 'help' for commands"));
   }
 
-  // Reset idle timer after any command
+
   damson.idle.ResetTimer();
 }
 
 void setup() {
-  // Start with communication DISABLED so we can use serial for text commands
-  // (The protocol handler would otherwise consume our serial data)
+
+
   damson.Start(false);
 
-  // Manually start serial since we disabled commFunction
+
   Serial.begin(115200);
 
-  // Signature startup: shake front-right leg to confirm Damson firmware
-  damson.StartupShake(1, 3);  // Leg 1, shake 3 times
 
-  // Enable idle animations (use web interface to disable for manual testing)
+  damson.StartupShake(1, 3);
+
+
   damson.idle.SetEnabled(true);
 
-  // Print welcome message
+
   Serial.println(F(""));
   Serial.println(F("Damson Animation Tester Ready"));
   Serial.println(F("Type 'help' for commands"));
@@ -321,13 +299,13 @@ void setup() {
 }
 
 void loop() {
-  // Handle incoming commands from Serial/WiFi
+
   damson.Update();
 
-  // Check for idle animations
+
   damson.idle.Update();
 
-  // Read serial commands for animation testing
+
   while (Serial.available() > 0) {
     char c = Serial.read();
     if (c == '\n' || c == '\r') {
