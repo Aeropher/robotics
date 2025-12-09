@@ -119,24 +119,36 @@ void IdleAnimations::DefaultTurnRightLeft()
 
 // =================================================================================================
 // WAVE GAIT - Moves one leg at a time in sequence
-// Slower but more stable, like a caterpillar wave
-// Leg order: 1 -> 2 -> 3 -> 6 -> 5 -> 4 (alternating sides front to back)
+// Each cycle: lift leg, move it forward, lower it, then push body forward with all legs
+// Leg order for forward: back legs first (3,6), then middle (2,5), then front (1,4)
+// This creates a wave that pushes the body forward
 // =================================================================================================
 
-// Helper: Move a single leg forward/back in wave pattern
-static void WaveStepLeg(RobotAction* robotAction, int leg, float yDir, float stepHeight, float stepLength)
+// Wave gait step: reposition one leg, then push body
+// For forward motion: leg moves forward (positive Y), then all legs push back (negative Y on body = forward motion)
+static void WaveStep(RobotAction* robotAction, int leg, float stepHeight, float legReach, float bodyPush)
 {
-  robotAction->LegMoveToRelatively(leg, Point(0, 0, stepHeight));        // Lift
-  robotAction->LegMoveToRelatively(leg, Point(0, yDir * stepLength, 0)); // Move
-  robotAction->LegMoveToRelatively(leg, Point(0, 0, -stepHeight));       // Lower
+  // 1. Lift this leg
+  robotAction->LegMoveToRelatively(leg, Point(0, 0, stepHeight));
+
+  // 2. Move leg forward (to where it will plant)
+  robotAction->LegMoveToRelatively(leg, Point(0, legReach, 0));
+
+  // 3. Lower leg
+  robotAction->LegMoveToRelatively(leg, Point(0, 0, -stepHeight));
+
+  // 4. Push body forward by moving all legs backward relative to body
+  //    Using TwistBody to shift body forward (which moves legs backward in body frame)
+  robotAction->TwistBody(Point(0, bodyPush, 0), Point(0, 0, 0));
 }
 
-// Helper: Move a single leg left/right in wave pattern
-static void WaveStepLegSide(RobotAction* robotAction, int leg, float xDir, float stepHeight, float stepLength)
+// Wave gait step for lateral movement
+static void WaveStepSide(RobotAction* robotAction, int leg, float stepHeight, float legReach, float bodyPush)
 {
-  robotAction->LegMoveToRelatively(leg, Point(0, 0, stepHeight));        // Lift
-  robotAction->LegMoveToRelatively(leg, Point(xDir * stepLength, 0, 0)); // Move
-  robotAction->LegMoveToRelatively(leg, Point(0, 0, -stepHeight));       // Lower
+  robotAction->LegMoveToRelatively(leg, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(leg, Point(legReach, 0, 0));
+  robotAction->LegMoveToRelatively(leg, Point(0, 0, -stepHeight));
+  robotAction->TwistBody(Point(bodyPush, 0, 0), Point(0, 0, 0));
 }
 
 void IdleAnimations::WaveForwardBack()
@@ -144,25 +156,27 @@ void IdleAnimations::WaveForwardBack()
   if (robotAction == nullptr) return;
 
   const float stepHeight = 25;
-  const float stepLength = 25;
+  const float legReach = 15;    // How far leg reaches forward
+  const float bodyPush = 5;     // How much body moves per step (constrained by TwistBody limits)
 
-  // Wave forward: each leg steps forward in sequence
-  WaveStepLeg(robotAction, 1, 1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 2, 1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 3, 1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 6, 1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 5, 1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 4, 1, stepHeight, stepLength);
+  // Wave forward: back to front, one leg at a time
+  // Each leg reaches forward, plants, then body shifts forward
+  WaveStep(robotAction, 3, stepHeight, legReach, bodyPush);  // back-right
+  WaveStep(robotAction, 6, stepHeight, legReach, bodyPush);  // back-left
+  WaveStep(robotAction, 2, stepHeight, legReach, bodyPush);  // mid-right
+  WaveStep(robotAction, 5, stepHeight, legReach, bodyPush);  // mid-left
+  WaveStep(robotAction, 1, stepHeight, legReach, bodyPush);  // front-right
+  WaveStep(robotAction, 4, stepHeight, legReach, bodyPush);  // front-left
 
   delay(300);
 
-  // Wave backward: each leg steps backward in sequence
-  WaveStepLeg(robotAction, 1, -1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 2, -1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 3, -1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 6, -1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 5, -1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 4, -1, stepHeight, stepLength);
+  // Wave backward: front to back
+  WaveStep(robotAction, 1, stepHeight, -legReach, -bodyPush);
+  WaveStep(robotAction, 4, stepHeight, -legReach, -bodyPush);
+  WaveStep(robotAction, 2, stepHeight, -legReach, -bodyPush);
+  WaveStep(robotAction, 5, stepHeight, -legReach, -bodyPush);
+  WaveStep(robotAction, 3, stepHeight, -legReach, -bodyPush);
+  WaveStep(robotAction, 6, stepHeight, -legReach, -bodyPush);
 
   robotAction->InitialState();
 }
@@ -172,25 +186,26 @@ void IdleAnimations::WaveBackForward()
   if (robotAction == nullptr) return;
 
   const float stepHeight = 25;
-  const float stepLength = 25;
+  const float legReach = 15;
+  const float bodyPush = 5;
 
-  // Wave backward first
-  WaveStepLeg(robotAction, 1, -1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 2, -1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 3, -1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 6, -1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 5, -1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 4, -1, stepHeight, stepLength);
+  // Wave backward first: front to back
+  WaveStep(robotAction, 1, stepHeight, -legReach, -bodyPush);
+  WaveStep(robotAction, 4, stepHeight, -legReach, -bodyPush);
+  WaveStep(robotAction, 2, stepHeight, -legReach, -bodyPush);
+  WaveStep(robotAction, 5, stepHeight, -legReach, -bodyPush);
+  WaveStep(robotAction, 3, stepHeight, -legReach, -bodyPush);
+  WaveStep(robotAction, 6, stepHeight, -legReach, -bodyPush);
 
   delay(300);
 
-  // Then wave forward
-  WaveStepLeg(robotAction, 1, 1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 2, 1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 3, 1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 6, 1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 5, 1, stepHeight, stepLength);
-  WaveStepLeg(robotAction, 4, 1, stepHeight, stepLength);
+  // Then wave forward: back to front
+  WaveStep(robotAction, 3, stepHeight, legReach, bodyPush);
+  WaveStep(robotAction, 6, stepHeight, legReach, bodyPush);
+  WaveStep(robotAction, 2, stepHeight, legReach, bodyPush);
+  WaveStep(robotAction, 5, stepHeight, legReach, bodyPush);
+  WaveStep(robotAction, 1, stepHeight, legReach, bodyPush);
+  WaveStep(robotAction, 4, stepHeight, legReach, bodyPush);
 
   robotAction->InitialState();
 }
@@ -200,25 +215,26 @@ void IdleAnimations::WaveLeftRight()
   if (robotAction == nullptr) return;
 
   const float stepHeight = 25;
-  const float stepLength = 20;
+  const float legReach = 12;
+  const float bodyPush = 4;
 
-  // Wave left
-  WaveStepLegSide(robotAction, 1, -1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 2, -1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 3, -1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 6, -1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 5, -1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 4, -1, stepHeight, stepLength);
+  // Wave left (negative X direction for body)
+  WaveStepSide(robotAction, 1, stepHeight, -legReach, -bodyPush);
+  WaveStepSide(robotAction, 4, stepHeight, -legReach, -bodyPush);
+  WaveStepSide(robotAction, 2, stepHeight, -legReach, -bodyPush);
+  WaveStepSide(robotAction, 5, stepHeight, -legReach, -bodyPush);
+  WaveStepSide(robotAction, 3, stepHeight, -legReach, -bodyPush);
+  WaveStepSide(robotAction, 6, stepHeight, -legReach, -bodyPush);
 
   delay(300);
 
   // Wave right
-  WaveStepLegSide(robotAction, 1, 1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 2, 1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 3, 1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 6, 1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 5, 1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 4, 1, stepHeight, stepLength);
+  WaveStepSide(robotAction, 1, stepHeight, legReach, bodyPush);
+  WaveStepSide(robotAction, 4, stepHeight, legReach, bodyPush);
+  WaveStepSide(robotAction, 2, stepHeight, legReach, bodyPush);
+  WaveStepSide(robotAction, 5, stepHeight, legReach, bodyPush);
+  WaveStepSide(robotAction, 3, stepHeight, legReach, bodyPush);
+  WaveStepSide(robotAction, 6, stepHeight, legReach, bodyPush);
 
   robotAction->InitialState();
 }
@@ -228,25 +244,26 @@ void IdleAnimations::WaveRightLeft()
   if (robotAction == nullptr) return;
 
   const float stepHeight = 25;
-  const float stepLength = 20;
+  const float legReach = 12;
+  const float bodyPush = 4;
 
   // Wave right first
-  WaveStepLegSide(robotAction, 1, 1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 2, 1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 3, 1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 6, 1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 5, 1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 4, 1, stepHeight, stepLength);
+  WaveStepSide(robotAction, 1, stepHeight, legReach, bodyPush);
+  WaveStepSide(robotAction, 4, stepHeight, legReach, bodyPush);
+  WaveStepSide(robotAction, 2, stepHeight, legReach, bodyPush);
+  WaveStepSide(robotAction, 5, stepHeight, legReach, bodyPush);
+  WaveStepSide(robotAction, 3, stepHeight, legReach, bodyPush);
+  WaveStepSide(robotAction, 6, stepHeight, legReach, bodyPush);
 
   delay(300);
 
   // Then wave left
-  WaveStepLegSide(robotAction, 1, -1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 2, -1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 3, -1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 6, -1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 5, -1, stepHeight, stepLength);
-  WaveStepLegSide(robotAction, 4, -1, stepHeight, stepLength);
+  WaveStepSide(robotAction, 1, stepHeight, -legReach, -bodyPush);
+  WaveStepSide(robotAction, 4, stepHeight, -legReach, -bodyPush);
+  WaveStepSide(robotAction, 2, stepHeight, -legReach, -bodyPush);
+  WaveStepSide(robotAction, 5, stepHeight, -legReach, -bodyPush);
+  WaveStepSide(robotAction, 3, stepHeight, -legReach, -bodyPush);
+  WaveStepSide(robotAction, 6, stepHeight, -legReach, -bodyPush);
 
   robotAction->InitialState();
 }
@@ -256,31 +273,65 @@ void IdleAnimations::WaveTurnLeftRight()
   if (robotAction == nullptr) return;
 
   const float stepHeight = 25;
-  const float turnAmount = 15;
+  const float legReach = 10;
 
-  // Turn left: right legs forward, left legs backward
-  // Leg 1 (front-right) forward
-  WaveStepLeg(robotAction, 1, 1, stepHeight, turnAmount);
-  // Leg 4 (front-left) backward
-  WaveStepLeg(robotAction, 4, -1, stepHeight, turnAmount);
-  // Leg 2 (mid-right) forward
-  WaveStepLeg(robotAction, 2, 1, stepHeight, turnAmount);
-  // Leg 5 (mid-left) backward
-  WaveStepLeg(robotAction, 5, -1, stepHeight, turnAmount);
-  // Leg 3 (back-right) forward
-  WaveStepLeg(robotAction, 3, 1, stepHeight, turnAmount);
-  // Leg 6 (back-left) backward
-  WaveStepLeg(robotAction, 6, -1, stepHeight, turnAmount);
+  // Turn left: right side legs forward, left side legs backward
+  // Reposition legs first
+  robotAction->LegMoveToRelatively(1, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(1, Point(0, legReach, 0));
+  robotAction->LegMoveToRelatively(1, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(4, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(4, Point(0, -legReach, 0));
+  robotAction->LegMoveToRelatively(4, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(2, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(2, Point(0, legReach, 0));
+  robotAction->LegMoveToRelatively(2, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(5, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(5, Point(0, -legReach, 0));
+  robotAction->LegMoveToRelatively(5, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(3, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(3, Point(0, legReach, 0));
+  robotAction->LegMoveToRelatively(3, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(6, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(6, Point(0, -legReach, 0));
+  robotAction->LegMoveToRelatively(6, Point(0, 0, -stepHeight));
+
+  // Rotate body to complete the turn
+  robotAction->TwistBody(Point(0, 0, 0), Point(0, 0, -10));
 
   delay(300);
 
-  // Turn right: left legs forward, right legs backward
-  WaveStepLeg(robotAction, 4, 1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 1, -1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 5, 1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 2, -1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 6, 1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 3, -1, stepHeight, turnAmount);
+  // Turn right: opposite
+  robotAction->LegMoveToRelatively(1, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(1, Point(0, -legReach, 0));
+  robotAction->LegMoveToRelatively(1, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(4, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(4, Point(0, legReach, 0));
+  robotAction->LegMoveToRelatively(4, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(2, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(2, Point(0, -legReach, 0));
+  robotAction->LegMoveToRelatively(2, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(5, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(5, Point(0, legReach, 0));
+  robotAction->LegMoveToRelatively(5, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(3, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(3, Point(0, -legReach, 0));
+  robotAction->LegMoveToRelatively(3, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(6, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(6, Point(0, legReach, 0));
+  robotAction->LegMoveToRelatively(6, Point(0, 0, -stepHeight));
+
+  robotAction->TwistBody(Point(0, 0, 0), Point(0, 0, 10));
 
   robotAction->InitialState();
 }
@@ -290,25 +341,63 @@ void IdleAnimations::WaveTurnRightLeft()
   if (robotAction == nullptr) return;
 
   const float stepHeight = 25;
-  const float turnAmount = 15;
+  const float legReach = 10;
 
-  // Turn right first: left legs forward, right legs backward
-  WaveStepLeg(robotAction, 4, 1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 1, -1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 5, 1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 2, -1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 6, 1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 3, -1, stepHeight, turnAmount);
+  // Turn right first
+  robotAction->LegMoveToRelatively(1, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(1, Point(0, -legReach, 0));
+  robotAction->LegMoveToRelatively(1, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(4, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(4, Point(0, legReach, 0));
+  robotAction->LegMoveToRelatively(4, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(2, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(2, Point(0, -legReach, 0));
+  robotAction->LegMoveToRelatively(2, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(5, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(5, Point(0, legReach, 0));
+  robotAction->LegMoveToRelatively(5, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(3, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(3, Point(0, -legReach, 0));
+  robotAction->LegMoveToRelatively(3, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(6, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(6, Point(0, legReach, 0));
+  robotAction->LegMoveToRelatively(6, Point(0, 0, -stepHeight));
+
+  robotAction->TwistBody(Point(0, 0, 0), Point(0, 0, 10));
 
   delay(300);
 
-  // Then turn left: right legs forward, left legs backward
-  WaveStepLeg(robotAction, 1, 1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 4, -1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 2, 1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 5, -1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 3, 1, stepHeight, turnAmount);
-  WaveStepLeg(robotAction, 6, -1, stepHeight, turnAmount);
+  // Then turn left
+  robotAction->LegMoveToRelatively(1, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(1, Point(0, legReach, 0));
+  robotAction->LegMoveToRelatively(1, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(4, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(4, Point(0, -legReach, 0));
+  robotAction->LegMoveToRelatively(4, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(2, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(2, Point(0, legReach, 0));
+  robotAction->LegMoveToRelatively(2, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(5, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(5, Point(0, -legReach, 0));
+  robotAction->LegMoveToRelatively(5, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(3, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(3, Point(0, legReach, 0));
+  robotAction->LegMoveToRelatively(3, Point(0, 0, -stepHeight));
+
+  robotAction->LegMoveToRelatively(6, Point(0, 0, stepHeight));
+  robotAction->LegMoveToRelatively(6, Point(0, -legReach, 0));
+  robotAction->LegMoveToRelatively(6, Point(0, 0, -stepHeight));
+
+  robotAction->TwistBody(Point(0, 0, 0), Point(0, 0, -10));
 
   robotAction->InitialState();
 }
