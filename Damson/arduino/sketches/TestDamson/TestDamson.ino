@@ -68,6 +68,11 @@ void printHelp() {
   Serial.println(F("  idle off    - Disable auto animations"));
   Serial.println(F("  timeout N   - Set idle timeout (seconds)"));
   Serial.println(F(""));
+  Serial.println(F("Motor Testing (bypasses limits!):"));
+  Serial.println(F("  servo L J A - Set servo angle directly"));
+  Serial.println(F("                L=leg(1-6) J=joint(0-2) A=angle(0-180)"));
+  Serial.println(F("                Joint: 0=Hip, 1=Femur, 2=Tibia"));
+  Serial.println(F(""));
 }
 
 void processCommand(String cmd) {
@@ -285,6 +290,47 @@ void processCommand(String cmd) {
     } else {
       Serial.println(F("Invalid timeout value"));
     }
+  }
+  // Motor testing: servo <leg> <joint> <angle>
+  // leg: 1-6, joint: 0=A(hip), 1=B(femur), 2=C(tibia), angle: 0-180
+  else if (cmd.startsWith("servo ")) {
+    int firstSpace = 6;
+    int secondSpace = cmd.indexOf(' ', firstSpace);
+    int thirdSpace = cmd.indexOf(' ', secondSpace + 1);
+
+    if (secondSpace > 0 && thirdSpace > 0) {
+      int leg = cmd.substring(firstSpace, secondSpace).toInt();
+      int joint = cmd.substring(secondSpace + 1, thirdSpace).toInt();
+      int angle = cmd.substring(thirdSpace + 1).toInt();
+
+      if (leg >= 1 && leg <= 6 && joint >= 0 && joint <= 2 && angle >= 0 && angle <= 180) {
+        const char* jointNames[] = {"A (Hip)", "B (Femur)", "C (Tibia)"};
+        Serial.print(F("Setting Leg "));
+        Serial.print(leg);
+        Serial.print(F(" Joint "));
+        Serial.print(jointNames[joint]);
+        Serial.print(F(" to "));
+        Serial.print(angle);
+        Serial.println(F(" degrees"));
+
+        damson.SetServoAngle(leg, joint, angle);
+        Serial.println(F("Done."));
+      } else {
+        Serial.println(F("Invalid values. Use: servo <leg 1-6> <joint 0-2> <angle 0-180>"));
+      }
+    } else {
+      Serial.println(F("Usage: servo <leg> <joint> <angle>"));
+      Serial.println(F("  leg: 1-6, joint: 0=A(hip), 1=B(femur), 2=C(tibia), angle: 0-180"));
+    }
+  }
+  else if (cmd == "angles") {
+    // Report current servo angles for all legs
+    // Format: leg,hip,femur,tibia for each leg
+    Serial.println(F("ANGLES:"));
+    // Note: We don't have direct access to servoAngleNow from here
+    // This would need to be added to the Robot class
+    // For now, output placeholder that web interface can parse
+    Serial.println(F("Not implemented yet - use reset to sync"));
   }
   else if (cmd == "help" || cmd == "?") {
     printHelp();

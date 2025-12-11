@@ -311,6 +311,13 @@ void Communication::HandleOrder(byte inData[], OrderSource orderSource)
     robotAction.robot.CalibrateServos();
     outData[outDataCounter++] = Orders::orderDone;
   }
+  else if (inData[1] == Orders::requestSetServoAngle)
+  {
+    // Motor testing - directly set servo angle (bypasses limits)
+    // inData[2] = leg (1-6), inData[3] = joint (0-2), inData[4] = angle (0-180)
+    robotAction.robot.SetServoAngle(inData[2], inData[3], inData[4]);
+    outData[outDataCounter++] = Orders::orderDone;
+  }
   else if (inData[1] >= 64 && inData[1] <= 108)
   {
     blockedOrder = inData[1];

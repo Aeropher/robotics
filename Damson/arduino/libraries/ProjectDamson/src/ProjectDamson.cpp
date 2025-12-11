@@ -180,4 +180,9 @@ void ProjectDamson::JumpWithSpeed(float speedMultiple)
   communication.robotAction.SetSpeedMultiple(0.5);
 }
 
+void ProjectDamson::SetServoAngle(int leg, int joint, int angle)
+{
+  communication.robotAction.robot.SetServoAngle(leg, joint, angle);
+}
+
 #endif

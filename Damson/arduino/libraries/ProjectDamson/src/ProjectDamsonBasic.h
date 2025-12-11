@@ -126,6 +126,9 @@ public:
 
   void RotateToDirectly(float jointAngle);
 
+  // For motor testing - bypasses joint angle limits (use with caution!)
+  void RotateToServoAngle(int servoAngle);
+
   float GetJointAngle(float servoAngle);
 
   bool CheckJointAngle(float jointAngle);
@@ -233,6 +236,9 @@ public:
   void GetPointsNow(RobotLegsPoints &points);
 
   void Update();
+
+  // For motor testing - set servo angle directly by leg (1-6) and joint (0=A, 1=B, 2=C)
+  void SetServoAngle(int leg, int joint, int angle);
 
   RobotLeg leg1, leg2, leg3, leg4, leg5, leg6;
 

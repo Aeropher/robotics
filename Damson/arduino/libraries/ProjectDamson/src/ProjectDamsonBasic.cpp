@@ -9,6 +9,7 @@
 #if defined(ARDUINO_AVR_MEGA2560)
 
 #include "ProjectDamsonBasic.h"
+#include "ProjectDamsonLimits.h"
 
 Power::Power() {}
 
@@ -211,6 +212,9 @@ void RobotJoint::RotateToDirectly(float jointAngle)
   if (servoAngle > 180)
     return;
 
+  // Apply global servo limits (MG90S servos don't reliably reach 0 or 180)
+  servoAngle = GlobalServoLimits::clamp((int)servoAngle);
+
   if (isFirstRotate)
   {
     isFirstRotate = false;
@@ -225,6 +229,29 @@ void RobotJoint::RotateToDirectly(float jointAngle)
 
   jointAngleNow = jointAngle;
   servoAngleNow = servoAngle;
+}
+
+void RobotJoint::RotateToServoAngle(int servoAngle)
+{
+  // Direct servo control - bypasses joint angle limits for testing
+  // MG90S servos have 0-180 degree range
+  if (servoAngle < 0 || servoAngle > 180)
+    return;
+
+  if (isFirstRotate)
+  {
+    isFirstRotate = false;
+    servo.attach(servoPin);
+    servo.write(servoAngle);
+    delay(firstRotateDelay);
+  }
+  else
+  {
+    servo.write(servoAngle);
+  }
+
+  servoAngleNow = servoAngle;
+  jointAngleNow = GetJointAngle(servoAngle);
 }
 
 float RobotJoint::GetJointAngle(float servoAngle)
@@ -515,6 +542,28 @@ void Robot::CalibrateState()
   SetSpeed(RobotLeg::defaultStepDistance);
   MoveTo(calibrateStatePoints);
   WaitUntilFree();
+}
+
+void Robot::SetServoAngle(int leg, int joint, int angle)
+{
+  // Get the appropriate leg
+  RobotLeg* targetLeg = nullptr;
+  switch (leg) {
+    case 1: targetLeg = &leg1; break;
+    case 2: targetLeg = &leg2; break;
+    case 3: targetLeg = &leg3; break;
+    case 4: targetLeg = &leg4; break;
+    case 5: targetLeg = &leg5; break;
+    case 6: targetLeg = &leg6; break;
+    default: return;
+  }
+
+  // Get the appropriate joint and set angle
+  switch (joint) {
+    case 0: targetLeg->jointA.RotateToServoAngle(angle); break;
+    case 1: targetLeg->jointB.RotateToServoAngle(angle); break;
+    case 2: targetLeg->jointC.RotateToServoAngle(angle); break;
+  }
 }
 
 void Robot::CalibrateServos()

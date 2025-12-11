@@ -49,6 +49,10 @@ public:
   static const byte requestMoveLeg = 30;            // [order] [leg] [64 + dx] [64 + dy] [64 + dz]
   static const byte requestCalibrate = 32;          // [order]
 
+  // Motor testing (bypasses safety limits - use with caution!)
+  // leg: 1-6, joint: 0=A(hip), 1=B(femur), 2=C(tibia), angle: 0-180
+  static const byte requestSetServoAngle = 34;      // [order] [leg] [joint] [angle]
+
   // Blocking orders, range is 64 ~ 127
 
   // Installation

@@ -217,6 +217,20 @@ public:
   * -----------------------------------------------------------------------------------------------*/
   void JumpWithSpeed(float speedMultiple);
 
+  // ===============================================================================================
+  // MOTOR TESTING - Direct servo control (bypasses safety limits!)
+  // ===============================================================================================
+
+ /*
+  * Brief     Set servo angle directly for testing motor limits
+  * Param     leg     Leg number (1-6)
+  * Param     joint   Joint: 0=A(Hip), 1=B(Femur), 2=C(Tibia)
+  * Param     angle   Servo angle (0-180)
+  * Retval    None
+  * Warning   Bypasses safety limits! Use with caution.
+  * -----------------------------------------------------------------------------------------------*/
+  void SetServoAngle(int leg, int joint, int angle);
+
   // Idle animation system - see ProjectDamsonIdle.h for full API
   IdleAnimations idle;
 
